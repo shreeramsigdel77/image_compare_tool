@@ -26,7 +26,8 @@ def get_screen_resolution():
 
 def global_counter_both(val):
     global def_value
-    print(def_value)
+    
+   
     if val == "next":
         def_value  += 1
     elif val == "prev":
@@ -150,7 +151,7 @@ while True:
             fnames1 = natsorted(fnames1)
             
             if len(fnames1)>0:
-                
+                len_fname1 = len(fnames1)
 
                 window["-IMAGE1-"].update(fnames1[def_value])
 
@@ -165,26 +166,23 @@ while True:
                 img_list2 = []
             
             fnames2 = []
-            print("length",len(img_list2))
+            
             for f in range(0,len(img_list2)):
                 if img_list2[f].split('.')[-1] in ["png",]:
                     fnames2.append(os.path.join(folder_pth2,img_list2[f]))
             fnames2 = natsorted(fnames2)
 
             if len(fnames2)>0:
+                len_fname2 = len(fnames2)
                 window['Previous'].update(disabled=False)
                 window['Next'].update(disabled=False)
                 window["-IMAGE2-"].update(fnames2[def_value])
-                window["TOTAL-IMGS"].update("Total No. of Images: "+str(len(fnames2))+f" Current Number :{def_value} ",text_color="green")
+                window["TOTAL-IMGS"].update(f" {def_value+1}/ "+str(len(fnames2)),text_color="green")
         
     elif event == "Previous":
-        print(os.path.exists(values["-FOLDER1-"]))
-        print(os.path.exists(values["-FOLDER2-"]))
-        print("len1",len(fnames1)>0)
-        print("len",len(fnames2)>0)
+       
         # print(T)
-        if os.path.exists(values["-FOLDER1-"]) & os.path.exists(values["-FOLDER2-"]) & len(fnames1)>0 & len(fnames2)>0:
-            print("Passs")
+        if os.path.exists(values["-FOLDER1-"]) & os.path.exists(values["-FOLDER2-"]) & (len(fnames1)>0) & (len(fnames2)>0):
             global_counter_both("prev")
             if def_value>=0:
                 # print(def_value)
@@ -195,13 +193,16 @@ while True:
                 window["-IMAGE1-"].update(fnames1[def_value])
                 window["-IMAGE2-"].update(fnames2[def_value])
 
+            window["warning_text"].update("",text_color="red")
         else:
             txt = "Please select a folder which contains images."
             window["warning_text"].update(txt,text_color="red")
-
+        window["TOTAL-IMGS"].update(f" {def_value+1}/ "+str(len(fnames2)),text_color="green")
     elif event == "Next":
-
-        if os.path.exists(values["-FOLDER1-"]) & os.path.exists(values["-FOLDER2-"]) & len(fnames1)>0 & len(fnames2)>0:
+        
+        if os.path.exists(values["-FOLDER1-"]) & os.path.exists(values["-FOLDER2-"]) & (len(fnames1)>0) & (len(fnames2)>0):
+        
+            
             global_counter_both("next")
             if def_value<len(fnames1):
                 window["-IMAGE1-"].update(fnames1[def_value])
@@ -210,8 +211,13 @@ while True:
                     def_value =0
                     window["-IMAGE1-"].update(fnames1[def_value])
                     window["-IMAGE2-"].update(fnames2[def_value])
+
+            window["warning_text"].update("",text_color="red")   
         else:
+            print("Next button failed")
             txt = "Please select a folder which contains images."
             window["warning_text"].update(txt,text_color="red")
+        
+        window["TOTAL-IMGS"].update(f" {def_value+1}/ "+str(len(fnames2)),text_color="green")
 
 window.close()

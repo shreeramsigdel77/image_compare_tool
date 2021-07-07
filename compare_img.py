@@ -15,23 +15,49 @@ col2_height = 480
 
 input_height = 50
 input_width = col1_width
+def global_counter_both(val):
+    global def_value   
+    if val == "Next":
+        def_value  += 1
+    elif val == "Previous":
+       def_value  -= 1
 
 def get_screen_resolution():
     screen_height = 900
     screen_width = 1024
     return screen_height, screen_width
 
+def update_img_win(folder_path:str,window_name:str):
+    fnames=[]
+    if os.path.exists(folder_path):
+        try:
+            img_list = os.listdir(folder_path)
+        except:
+            img_list = []
+        fnames = []
+        for f in range(0,len(img_list)):
+            if img_list[f].split('.')[-1] in ["png",]: #supports only png
+                fnames.append(os.path.join(folder_path,img_list[f]))
+        fnames = natsorted(fnames)
+        if len(fnames)>0:
+            window_name.update(fnames[def_value])
+    return fnames
+
+def update_nxt_prev_btn(window_name:str):
+    global f1_len
+    global f2_len 
+    if (f1_len == f2_len) & (f1_len>0):
+        window['Previous'].update(disabled=False)
+        window['Next'].update(disabled=False)
+        window["TOTAL-IMGS"].update(f" {def_value+1}/ "+str(f1_len),text_color="green")
+
+def win_update(fnames1,fnames2,def_value:int):
+    window["-IMAGE1-"].update(fnames1[def_value])
+    window["-IMAGE2-"].update(fnames2[def_value])
 
 
 
-def global_counter_both(val):
-    global def_value
-    
-   
-    if val == "next":
-        def_value  += 1
-    elif val == "prev":
-       def_value  -= 1
+
 
 
 
@@ -121,7 +147,8 @@ layout = [
 
 
 
-
+f1_len = 0
+f2_len = 0
 
 
 # Create the Window
@@ -136,81 +163,45 @@ while True:
         break
     # pick filenames from first
     elif event == "-FOLDER1-" :
-        if os.path.exists(values["-FOLDER1-"]):
-            folder_pth1 = values["-FOLDER1-"]
-
-            try:
-                img_list1 = os.listdir(folder_pth1)
-            except:
-                img_list1 = []
-            
-            fnames1 = []
-            for f in range(0,len(img_list1)):
-                if img_list1[f].split('.')[-1] in ["png",]: #supports only png
-                    fnames1.append(os.path.join(folder_pth1,img_list1[f]))
-            fnames1 = natsorted(fnames1)
-            
-            if len(fnames1)>0:
-                len_fname1 = len(fnames1)
-
-                window["-IMAGE1-"].update(fnames1[def_value])
+        fnames1 = update_img_win(values["-FOLDER1-"],window["-IMAGE1-"])
+        f1_len = len(fnames1)
+        update_nxt_prev_btn(window["-IMAGE1-"])
+        
 
     #pick filenames from second
     elif event == "-FOLDER2-" :
-        if os.path.exists(values["-FOLDER2-"]):
-
-            folder_pth2 = values["-FOLDER2-"]
-            try:
-                img_list2 = os.listdir(folder_pth2)
-            except:
-                img_list2 = []
-            
-            fnames2 = []
-            
-            for f in range(0,len(img_list2)):
-                if img_list2[f].split('.')[-1] in ["png",]:
-                    fnames2.append(os.path.join(folder_pth2,img_list2[f]))
-            fnames2 = natsorted(fnames2)
-
-            if len(fnames2)>0:
-                len_fname2 = len(fnames2)
-                window['Previous'].update(disabled=False)
-                window['Next'].update(disabled=False)
-                window["-IMAGE2-"].update(fnames2[def_value])
-                window["TOTAL-IMGS"].update(f" {def_value+1}/ "+str(len(fnames2)),text_color="green")
+        fnames2 = update_img_win(values["-FOLDER2-"],window["-IMAGE2-"])
+        f2_len = len(fnames2)
+        update_nxt_prev_btn(window["-IMAGE2-"])
+        
         
     elif event == "Previous":
-       
-        # print(T)
-        if os.path.exists(values["-FOLDER1-"]) & os.path.exists(values["-FOLDER2-"]) & (len(fnames1)>0) & (len(fnames2)>0):
-            global_counter_both("prev")
+        if os.path.exists(values["-FOLDER1-"]) & os.path.exists(values["-FOLDER2-"]) & (f1_len>0) & (f2_len>0):
+            global_counter_both("Previous")
             if def_value>=0:
-                # print(def_value)
-                window["-IMAGE1-"].update(fnames1[def_value])
-                window["-IMAGE2-"].update(fnames2[def_value])
+                win_update(fnames1,fnames2,def_value)
+                
             elif def_value <0:
                 def_value = (len(fnames1)-1)
-                window["-IMAGE1-"].update(fnames1[def_value])
-                window["-IMAGE2-"].update(fnames2[def_value])
-
+                win_update(fnames1,fnames2,def_value)
             window["warning_text"].update("",text_color="red")
+            
         else:
             txt = "Please select a folder which contains images."
             window["warning_text"].update(txt,text_color="red")
         window["TOTAL-IMGS"].update(f" {def_value+1}/ "+str(len(fnames2)),text_color="green")
+
     elif event == "Next":
         
-        if os.path.exists(values["-FOLDER1-"]) & os.path.exists(values["-FOLDER2-"]) & (len(fnames1)>0) & (len(fnames2)>0):
-        
-            
-            global_counter_both("next")
+        if os.path.exists(values["-FOLDER1-"]) & os.path.exists(values["-FOLDER2-"]) & (f1_len>0) & (f2_len>0):
+            global_counter_both("Next")
             if def_value<len(fnames1):
-                window["-IMAGE1-"].update(fnames1[def_value])
-                window["-IMAGE2-"].update(fnames2[def_value])
+                win_update(fnames1,fnames2,def_value)
+                
             elif def_value == len(fnames1):
-                    def_value =0
-                    window["-IMAGE1-"].update(fnames1[def_value])
-                    window["-IMAGE2-"].update(fnames2[def_value])
+                def_value =0
+                win_update(fnames1,fnames2,def_value)
+                    
 
             window["warning_text"].update("",text_color="red")   
         else:
